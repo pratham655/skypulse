@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const BASE_URL = "http://localhost:5000/api/weather";
+const BASE_URL = "https://skypulse-g0tf.onrender.com/api/weather";
 
 export const fetchWeather = async (city) => {
   const response = await axios.get(`${BASE_URL}?city=${city}`);
