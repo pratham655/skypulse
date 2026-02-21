@@ -4,7 +4,7 @@ const express = require("express");
 const cors = require("cors");
 const rateLimit = require("express-rate-limit");
 
-const weatherRoutes = require("./routes/weatherRoutes");
+const weatherRoutes = require("./ROUTES/weatherRoutes");
 
 const app = express();
 
