@@ -31,11 +31,10 @@ const Home = () => {
     JSON.parse(localStorage.getItem("history")) || []
   );
 
-  /* AUTOCOMPLETE */
+  /* ================= AUTOCOMPLETE ================= */
   useEffect(() => {
     const fetchSuggestions = async () => {
       if (city.length < 2) return setSuggestions([]);
-
       try {
         const res = await axios.get(
           `https://skypulse-g0tf.onrender.com/api/weather/search?query=${city}`
@@ -45,12 +44,11 @@ const Home = () => {
         setSuggestions([]);
       }
     };
-
     const delay = setTimeout(fetchSuggestions, 400);
     return () => clearTimeout(delay);
   }, [city]);
 
-  /* SEARCH */
+  /* ================= SEARCH ================= */
   const handleSearch = async (selected) => {
     const finalCity = selected || city;
     try {
@@ -70,7 +68,7 @@ const Home = () => {
     }
   };
 
-  /* LIVE LOCATION */
+  /* ================= LIVE LOCATION ================= */
   const detectLocation = () => {
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
@@ -103,15 +101,7 @@ const Home = () => {
           <button onClick={detectLocation}>Use My Location</button>
 
           {suggestions.length > 0 && (
-            <div
-              style={{
-                position: "absolute",
-                top: "40px",
-                background: "white",
-                color: "black",
-                width: "250px",
-              }}
-            >
+            <div style={{ position: "absolute", top: "40px", background: "white", color: "black", width: "250px" }}>
               {suggestions.map((s, i) => (
                 <div
                   key={i}
@@ -140,9 +130,10 @@ const Home = () => {
             <div style={{ padding: "20px" }}>
               <h2>{weather.city}</h2>
               <h1>{weather.current.temperature}°C</h1>
-              <p>{weather.current.condition}</p>
+              <p>{weather.current.condition} {getWeatherEmoji(weather.current.condition)}</p>
+              <p>Feels Like: {weather.current.feels_like}°C</p>
 
-              {/* WIND ARROW */}
+              {/* WIND */}
               <div
                 style={{
                   transform: `rotate(${getWindRotation(
@@ -153,6 +144,9 @@ const Home = () => {
               >
                 ↑
               </div>
+              <p>
+                Wind: {weather.current.wind_speed} km/h ({weather.current.wind_direction})
+              </p>
 
               {/* AQI */}
               <div
@@ -181,8 +175,10 @@ const Home = () => {
             {/* FORECAST */}
             <h3>14 Day Forecast</h3>
             {weather.forecast.map((day) => (
-              <div key={day.date}>
-                {day.date} — {day.max_temp}°C / {day.min_temp}°C
+              <div key={day.date} style={{ marginBottom: "10px" }}>
+                {day.date} — {getWeatherEmoji(day.condition)} {day.condition} — 
+                {day.max_temp}°C / {day.min_temp}°C
+                <div>🌅 {day.sunrise} | 🌇 {day.sunset}</div>
               </div>
             ))}
 
@@ -199,7 +195,6 @@ const Home = () => {
               }}
             />
 
-            {/* TREND INSIGHT */}
             <TrendInsight forecast={weather.forecast} />
 
             {/* COMPARE */}
@@ -232,11 +227,20 @@ const Home = () => {
 
 /* HELPERS */
 
+const getWeatherEmoji = (condition) => {
+  const c = condition.toLowerCase();
+  if (c.includes("sun")) return "☀️";
+  if (c.includes("cloud")) return "☁️";
+  if (c.includes("rain")) return "🌧️";
+  if (c.includes("storm")) return "⛈️";
+  if (c.includes("mist") || c.includes("fog")) return "🌫️";
+  return "🌤️";
+};
+
 const TrendInsight = ({ forecast }) => {
   const diff =
     forecast[forecast.length - 1].max_temp -
     forecast[0].max_temp;
-
   if (diff > 3) return <p>📈 Warming trend expected</p>;
   if (diff < -3) return <p>📉 Cooling trend expected</p>;
   return <p>🌡 Stable temperatures</p>;
